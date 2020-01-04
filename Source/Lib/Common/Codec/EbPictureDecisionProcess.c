@@ -775,6 +775,11 @@ EbErrorType signal_derivation_multi_processes_oq(
 
 #if TWO_PASS_USE_2NDP_ME_IN_1STP
     uint8_t enc_mode_hme = sequence_control_set_ptr->use_output_stat_file ? picture_control_set_ptr->snd_pass_enc_mode : picture_control_set_ptr->enc_mode;
+
+#if M1_ENABLE_HME_FLAG
+    enc_mode_hme = ENC_M1;
+#endif
+
     picture_control_set_ptr->enable_hme_flag = enable_hme_flag[picture_control_set_ptr->sc_content_detected][sequence_control_set_ptr->input_resolution][enc_mode_hme];
 
     picture_control_set_ptr->enable_hme_level0_flag = enable_hme_level0_flag[picture_control_set_ptr->sc_content_detected][sequence_control_set_ptr->input_resolution][enc_mode_hme];
@@ -829,7 +834,11 @@ EbErrorType signal_derivation_multi_processes_oq(
                 picture_control_set_ptr->pic_depth_mode = PIC_SQ_NON4_DEPTH_MODE;
 #endif
 #if MULTI_PASS_PD
+#if MR_PIC_DEPTH_MODE // non-SC only
+        else if (1)
+#else
         else if (MR_MODE)
+#endif
             picture_control_set_ptr->pic_depth_mode = PIC_ALL_DEPTH_MODE;
         else if (picture_control_set_ptr->enc_mode == ENC_M0)
             // Use a single-stage PD if I_SLICE
@@ -889,6 +898,13 @@ EbErrorType signal_derivation_multi_processes_oq(
                 picture_control_set_ptr->pic_depth_mode = PIC_SQ_NON4_DEPTH_MODE;
             else
                 picture_control_set_ptr->pic_depth_mode = PIC_SB_SWITCH_DEPTH_MODE;
+#endif
+
+#if M1_PIC_DEPTH_MODE
+        if (sc_content_detected)
+            picture_control_set_ptr->pic_depth_mode = PIC_ALL_DEPTH_MODE;
+        else
+            picture_control_set_ptr->pic_depth_mode = (picture_control_set_ptr->slice_type == I_SLICE) ? PIC_ALL_DEPTH_MODE : PIC_MULTI_PASS_PD_MODE_2;
 #endif
 
         if (picture_control_set_ptr->pic_depth_mode < PIC_SQ_DEPTH_MODE)
@@ -953,7 +969,11 @@ EbErrorType signal_derivation_multi_processes_oq(
     // NSQ_SEARCH_LEVEL6                              Allow only NSQ Inter-NEAREST/NEAR/GLOBAL if parent SQ has no coeff + reordering nsq_table number and testing only 6 NSQ SHAPE
     // NSQ_SEARCH_FULL                                Allow NSQ Intra-FULL and Inter-FULL
 
+#if MR_NSQ_SEARCH_LEVEL
+        if (1)
+#else
         if (MR_MODE)
+#endif
             picture_control_set_ptr->nsq_search_level = NSQ_SEARCH_FULL;
 #if MULTI_PASS_PD
         else if (picture_control_set_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_0 ||
@@ -1013,6 +1033,10 @@ EbErrorType signal_derivation_multi_processes_oq(
             picture_control_set_ptr->nsq_search_level = NSQ_SEARCH_LEVEL7;
 #endif
 #if PRESETS_TUNE
+#if M1_NSQ_SEARCH_LEVEL
+        else if (1)
+            picture_control_set_ptr->nsq_search_level = (picture_control_set_ptr->is_used_as_reference_flag) ? NSQ_SEARCH_LEVEL6 : NSQ_SEARCH_LEVEL3;
+#endif
         else if (picture_control_set_ptr->enc_mode <= ENC_M0)
             picture_control_set_ptr->nsq_search_level = NSQ_SEARCH_LEVEL6;
         else if (picture_control_set_ptr->enc_mode <= ENC_M1)
@@ -1430,7 +1454,11 @@ EbErrorType signal_derivation_multi_processes_oq(
             picture_control_set_ptr->intra_pred_mode = 4;
     }
 
+#if MR_INTRA_PRED_MODE
+    if (1)
+#else
     if (MR_MODE)
+#endif
         picture_control_set_ptr->intra_pred_mode = 0;
 
     // Skip sub blk based on neighbors depth        Settings
@@ -1485,10 +1513,11 @@ EbErrorType signal_derivation_multi_processes_oq(
             picture_control_set_ptr->atb_mode = 0;
 
 #if ATB_TL
-#if MR_MODE
+#if MR_MODE || MR_ATB_MODE
         picture_control_set_ptr->atb_mode = ((!picture_control_set_ptr->sc_content_detected) || picture_control_set_ptr->temporal_layer_index == 0) ? 1 : 0;
 #endif
 #endif
+
         // Set skip atb                          Settings
         // 0                                     OFF
         // 1                                     ON
@@ -1525,6 +1554,9 @@ EbErrorType signal_derivation_multi_processes_oq(
         picture_control_set_ptr->wedge_mode = 1;
 #else
         picture_control_set_ptr->wedge_mode = 0;
+#endif
+#if M1_WEDGE_MODE
+        picture_control_set_ptr->wedge_mode = 1;
 #endif
         // inter intra pred                      Settings
         // 0                                     OFF
@@ -1611,7 +1643,7 @@ EbErrorType signal_derivation_multi_processes_oq(
         // GM_TRAN_ONLY                               Translation only using ME MV.
 #if GM_DOWNSAMPLED
         picture_control_set_ptr->gm_level = GM_DOWN;
-#if MR_MODE
+#if MR_MODE || MR_GM_LEVEL
         picture_control_set_ptr->gm_level = GM_FULL;
 #endif
 #else
@@ -1628,13 +1660,20 @@ EbErrorType signal_derivation_multi_processes_oq(
         //Prune reference and reduce ME SR based on HME/ME distortion
         // 0: OFF
         // 1: ON
+#if MR_PRUNE_REF_BASED_ME
+        if (1)
+#else
         if (picture_control_set_ptr->sc_content_detected || MR_MODE)
+#endif
             picture_control_set_ptr->prune_ref_based_me = 0;
         else if (picture_control_set_ptr->enc_mode == ENC_M0)
             picture_control_set_ptr->prune_ref_based_me = 1;
         else
             picture_control_set_ptr->prune_ref_based_me = 0;
         
+#if M1_PRUNE_REF_BASED_ME
+        picture_control_set_ptr->prune_ref_based_me = 0;
+#endif
 #endif
     return return_error;
 }

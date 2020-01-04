@@ -13564,7 +13564,11 @@ void integer_search_sb(
         : EB_FALSE;
 
 #if MULTI_PASS_PD
+#if M1_IS_NSQ_TABLE_USED
+    is_nsq_table_used = (
+#else
     is_nsq_table_used = (picture_control_set_ptr->enc_mode == ENC_M0 ||
+#endif
         picture_control_set_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_0 ||
         picture_control_set_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_1 ||
         picture_control_set_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_2 ||
@@ -13575,8 +13579,8 @@ void integer_search_sb(
     else
         is_nsq_table_used = sequence_control_set_ptr->static_config.nsq_table;
 #endif
-    if (context_ptr->me_alt_ref == EB_FALSE && is_nsq_table_used)
-        printf("NSQTBLE\n");
+    //if (context_ptr->me_alt_ref == EB_FALSE && is_nsq_table_used)
+    //    printf("NSQTBLE\n");
     if (context_ptr->me_alt_ref == EB_TRUE)
         numOfListToSearch = 0;
     for (list_index = REF_LIST_0; list_index <= numOfListToSearch; ++list_index) {
@@ -14284,7 +14288,11 @@ void hme_sb(
         : EB_FALSE;
 
 #if MULTI_PASS_PD
+#if M1_IS_NSQ_TABLE_USED
+    is_nsq_table_used = (
+#else
     is_nsq_table_used = (picture_control_set_ptr->enc_mode == ENC_M0 ||
+#endif
         picture_control_set_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_0 ||
         picture_control_set_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_1 ||
         picture_control_set_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_2 ||
@@ -14297,8 +14305,8 @@ void hme_sb(
 #endif
 
 
-    if (context_ptr->me_alt_ref == EB_FALSE && is_nsq_table_used)
-        printf("NSQTBLE\n");
+    //if (context_ptr->me_alt_ref == EB_FALSE && is_nsq_table_used)
+    //    printf("NSQTBLE\n");
 
 
     if (context_ptr->me_alt_ref == EB_TRUE)
@@ -15018,7 +15026,11 @@ EbErrorType motion_estimate_lcu(
         : EB_FALSE;
 
 #if MULTI_PASS_PD
+#if M1_IS_NSQ_TABLE_USED
+    is_nsq_table_used = (
+#else
     is_nsq_table_used = (picture_control_set_ptr->enc_mode == ENC_M0 ||
+#endif
         picture_control_set_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_0 ||
         picture_control_set_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_1 ||
         picture_control_set_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_2 ||

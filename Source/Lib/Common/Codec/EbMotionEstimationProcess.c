@@ -211,7 +211,11 @@ EbErrorType signal_derivation_me_kernel_oq(
         context_ptr->me_context_ptr->use_subpel_flag = sequence_control_set_ptr->static_config.enable_subpel;
 
 #if SC_PRESETS_OPT
+#if MR_HALF_QUARTER_PEL_MODE
+    if (!picture_control_set_ptr->sc_content_detected) {
+#else
     if (MR_MODE && !picture_control_set_ptr->sc_content_detected) {
+#endif
 #else
     if (MR_MODE) {
 #endif
@@ -236,6 +240,13 @@ EbErrorType signal_derivation_me_kernel_oq(
         context_ptr->me_context_ptr->quarter_pel_mode =
             REFINMENT_QP_MODE;
     }
+
+#if M1_HALF_QUARTER_PEL_MODE
+    context_ptr->me_context_ptr->half_pel_mode =
+        REFINMENT_HP_MODE;
+    context_ptr->me_context_ptr->quarter_pel_mode =
+        REFINMENT_QP_MODE;
+#endif
 
     // Set fractional search model
     // 0: search all blocks
@@ -452,6 +463,10 @@ void* tf_set_me_hme_params_oq(
 
     uint8_t sc_content_detected = picture_control_set_ptr->sc_content_detected;
 
+#if M1_HME_ME_SEARCH_AREA_TF
+    hmeMeLevel = ENC_M1;
+#endif
+
     // HME Level0
     me_context_ptr->hme_level0_total_search_area_width = tf_hme_level0_total_search_area_width[sc_content_detected][input_resolution][hmeMeLevel];
     me_context_ptr->hme_level0_total_search_area_height = tf_hme_level0_total_search_area_height[sc_content_detected][input_resolution][hmeMeLevel];
@@ -552,7 +567,11 @@ EbErrorType tf_signal_derivation_me_kernel_oq(
     else
         context_ptr->me_context_ptr->use_subpel_flag = sequence_control_set_ptr->static_config.enable_subpel;
 
+#if MR_HALF_QUARTER_PEL_MODE
+    if (1) {
+#else
     if (MR_MODE) {
+#endif
         context_ptr->me_context_ptr->half_pel_mode =
             EX_HP_MODE;
         context_ptr->me_context_ptr->quarter_pel_mode =
@@ -574,6 +593,13 @@ EbErrorType tf_signal_derivation_me_kernel_oq(
         context_ptr->me_context_ptr->quarter_pel_mode =
             REFINMENT_QP_MODE;
     }
+
+#if M1_HALF_QUARTER_PEL_MODE
+    context_ptr->me_context_ptr->half_pel_mode =
+        REFINMENT_HP_MODE;
+    context_ptr->me_context_ptr->quarter_pel_mode =
+        REFINMENT_QP_MODE;
+#endif
     // Set fractional search model
     // 0: search all blocks
     // 1: selective based on Full-Search SAD & MV.

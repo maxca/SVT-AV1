@@ -32,6 +32,50 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#define MR_MODE                                 0
+
+// MR to M0
+#define MR_TX_WEIGHT                            0
+#define MR_INTERPOLATION_SEARCH_LEVEL           0
+#define MR_EDGE_BASED_SKIP_ANGLE_INTRA          0
+#define MR_MD_STAGE_2_CLASS_PRUNE_TH            0 // non-SC only
+#define MR_SQ_WEIGHT                            0 // non-SC only
+#define MR_PIC_OBMC_MODE                        0 // non-SC only
+#define MR_HALF_QUARTER_PEL_MODE                0 // only affects SC for tf
+#define MR_PIC_DEPTH_MODE                       0 // non-SC only
+#define MR_NSQ_SEARCH_LEVEL                     0
+#define MR_INTRA_PRED_MODE                      0
+#define MR_ATB_MODE                             0 // non-SC only
+#define MR_GM_LEVEL                             0
+#define MR_PRUNE_REF_BASED_ME                   0
+
+// M1 to M0
+#define ENABLE_M1                               0
+#if ENABLE_M1
+#define M1_CHROMA_LEVEL                         1
+#define M1_NEW_NEAREST_NEAR_COMB                1
+#define M1_MD_EXIT_TH                           1
+#define M1_MD_STAGE_1_CAND_PRUNE_TH             1
+#define M1_MD_STAGE_1_CLASS_PRUNE_TH            1
+#define M1_MD_STAGE_2_CAND_PRUNE_TH             1
+#define M1_FULL_PEL_REF_WINDOW                  1
+#define M1_AUTO_MAX_PARTITION                   1
+#define M1_ENABLE_WM                            1
+#define M1_PIC_OBMC_MODE                        1
+#define M1_IS_NSQ_TABLE_USED                    1
+#define M1_HALF_QUARTER_PEL_MODE                1
+#define M1_HME_ME_SEARCH_AREA_TF                1
+#define M1_ENABLE_HME_FLAG                      1
+#define M1_NSQ_SEARCH_LEVEL                     1
+#define M1_PRUNE_REF_BASED_ME                   1
+#define M1_INTER_INTER_WEDGE_VAR                1
+#define M1_WEDGE_MODE                           1
+#define M1_INTERPOLATION_SEARCH_LEVEL_PD1       1
+#define M1_PIC_DEPTH_MODE                       1
+#endif
+
+
 #define SHUT_HME_L1_CHECK      1//Remove usage of ME results for list=0 refIndex=0 to be decide HME centre. Feauture assumes no MRP. and list1 distance = list0 distance.
 #define MUS_ME                 1 //MUlti-Stage ME - HME pruning
 #if MUS_ME
@@ -176,8 +220,6 @@ extern "C" {
 #ifndef NON_AVX512_SUPPORT
 #define NON_AVX512_SUPPORT
 #endif
-
-#define MR_MODE                           0
 
 #define WARP_UPDATE                       1 // Modified Warp settings: ON for MR mode. ON for ref frames in M0
 #define UPDATE_CDEF                       1 // Update bit cost estimation for CDEF filter

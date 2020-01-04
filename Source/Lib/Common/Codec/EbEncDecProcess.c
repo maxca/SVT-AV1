@@ -1223,7 +1223,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         context_ptr->tx_weight = FC_SKIP_TX_SR_TH025;
     else
 #if PRESETS_TUNE
+#if MR_TX_WEIGHT
+        if (1)
+#else
         if (MR_MODE) // tx weight
+#endif
             context_ptr->tx_weight = MAX_MODE_COST;
         else {
             if (context_ptr->tx_search_level == TX_SEARCH_ENC_DEC)
@@ -1312,7 +1316,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         context_ptr->interpolation_search_level = IT_SEARCH_OFF;
     else if (context_ptr->pd_pass == PD_PASS_1) {
 #if IFS_TL
+#if M1_INTERPOLATION_SEARCH_LEVEL_PD1
+        if (0)
+#else
         if (picture_control_set_ptr->enc_mode <= ENC_M0)
+#endif
             context_ptr->interpolation_search_level = IT_SEARCH_FAST_LOOP_UV_BLIND;
         else
 #endif
@@ -1322,7 +1330,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
             context_ptr->interpolation_search_level = IT_SEARCH_OFF;
     }
     else
+#if MR_INTERPOLATION_SEARCH_LEVEL
+    if (1)
+#else
     if (MR_MODE)
+#endif
         context_ptr->interpolation_search_level = IT_SEARCH_FAST_LOOP;
     else if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
 #if SC_PRESETS_OPT
@@ -1425,6 +1437,22 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     else // use specified level
       context_ptr->chroma_level = sequence_control_set_ptr->static_config.set_chroma_mode;
 
+#if M1_CHROMA_LEVEL
+    if (context_ptr->pd_pass == PD_PASS_0)
+        context_ptr->chroma_level = CHROMA_MODE_2; // or CHROMA_MODE_3
+    else if (context_ptr->pd_pass == PD_PASS_1) {
+        context_ptr->chroma_level = (picture_control_set_ptr->temporal_layer_index == 0) ? CHROMA_MODE_0 : CHROMA_MODE_1;
+    }
+    else if (sequence_control_set_ptr->static_config.set_chroma_mode == DEFAULT) {
+        if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
+            context_ptr->chroma_level = CHROMA_MODE_1;
+        else
+            context_ptr->chroma_level = (picture_control_set_ptr->temporal_layer_index == 0) ? CHROMA_MODE_0 : CHROMA_MODE_1;
+    } 
+    else // use specified level
+        context_ptr->chroma_level = sequence_control_set_ptr->static_config.set_chroma_mode;
+#endif
+
     // Set the full loop escape level
     // Level                Settings
     // 0                    Off
@@ -1521,6 +1549,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         else
 #endif
 #if FIX_NEAREST_NEW
+#if M1_NEW_NEAREST_NEAR_COMB
+            if (1)
+                context_ptr->new_nearest_near_comb_injection = 0;
+            else
+#endif
             if (picture_control_set_ptr->enc_mode <= ENC_M0 && picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag)
 #else
             if (picture_control_set_ptr->enc_mode == ENC_M0)
@@ -2014,7 +2047,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #endif
         if (sequence_control_set_ptr->static_config.edge_skp_angle_intra == DEFAULT) {
 #if FIX_ESTIMATE_INTRA
+#if MR_EDGE_BASED_SKIP_ANGLE_INTRA
+        if (1)
+#else
         if (MR_MODE)
+#endif
 #else
         if (MR_MODE || picture_control_set_ptr->enc_mode == ENC_M0)
 #endif
@@ -2092,6 +2129,10 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     else
         context_ptr->inter_inter_wedge_variance_th = 100;
 
+#if M1_INTER_INTER_WEDGE_VAR
+    context_ptr->inter_inter_wedge_variance_th = 100;
+#endif
+
     // Derive MD Exit TH
 #if MULTI_PASS_PD // Shut md_exit_th
     if (context_ptr->pd_pass == PD_PASS_0)
@@ -2108,6 +2149,15 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         context_ptr->md_exit_th = 0;
     else
         context_ptr->md_exit_th = (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected) ? 10 : 18;
+
+#if M1_MD_EXIT_TH
+    if (context_ptr->pd_pass == PD_PASS_0)
+        context_ptr->md_exit_th = 0;
+    else if (context_ptr->pd_pass == PD_PASS_1)
+        context_ptr->md_exit_th = (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected) ? 10 : 18;
+    else
+        context_ptr->md_exit_th = (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected) ? 10 : 18;
+#endif
 
 #if INTER_INTRA_CLASS_PRUNING
 
@@ -2142,6 +2192,17 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #endif
 #endif
 
+#if M1_MD_STAGE_1_CAND_PRUNE_TH
+    if (context_ptr->pd_pass == PD_PASS_0)
+        context_ptr->md_stage_1_cand_prune_th = (uint64_t)~0;
+    else if (context_ptr->pd_pass == PD_PASS_1)
+        context_ptr->md_stage_1_cand_prune_th = 75;
+    else if (sequence_control_set_ptr->input_resolution == INPUT_SIZE_576p_RANGE_OR_LOWER)
+        context_ptr->md_stage_1_cand_prune_th = (uint64_t)~0;
+    else
+        context_ptr->md_stage_1_cand_prune_th = sequence_control_set_ptr->static_config.md_stage_1_cand_prune_th;
+#endif
+
 #if INTER_INTRA_CLASS_PRUNING
 
     // md_stage_1_class_prune_th (for class removal)
@@ -2171,6 +2232,17 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         context_ptr->md_stage_1_class_prune_th = sequence_control_set_ptr->static_config.md_stage_1_class_prune_th;
     else
         context_ptr->md_stage_1_class_prune_th = (uint64_t)~0;
+
+#if M1_MD_STAGE_1_CLASS_PRUNE_TH
+    if (context_ptr->pd_pass == PD_PASS_0)
+        context_ptr->md_stage_1_class_prune_th = (uint64_t)~0;
+    else if (context_ptr->pd_pass == PD_PASS_1)
+        context_ptr->md_stage_1_class_prune_th = 100;
+    else if (sequence_control_set_ptr->input_resolution == INPUT_SIZE_576p_RANGE_OR_LOWER)
+        context_ptr->md_stage_1_class_prune_th = (uint64_t)~0;
+    else
+        context_ptr->md_stage_1_class_prune_th = sequence_control_set_ptr->static_config.md_stage_1_class_prune_th;
+#endif
 
     // md_stage_2_cand_prune_th (for single candidate removal per class)
     // Remove candidate if deviation to the best is higher than md_stage_2_cand_prune_th
@@ -2202,6 +2274,15 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     else
         context_ptr->md_stage_2_cand_prune_th = (uint64_t)~0;
 
+#if M1_MD_STAGE_2_CAND_PRUNE_TH
+    if (context_ptr->pd_pass == PD_PASS_0)
+        context_ptr->md_stage_2_cand_prune_th = (uint64_t)~0;
+    else if (context_ptr->pd_pass == PD_PASS_1)
+        context_ptr->md_stage_2_cand_prune_th = sequence_control_set_ptr->input_resolution <= INPUT_SIZE_1080i_RANGE ? 5 : 3;
+    else
+        context_ptr->md_stage_2_cand_prune_th = sequence_control_set_ptr->input_resolution <= INPUT_SIZE_1080i_RANGE ? 15 : 12;
+#endif
+
     // md_stage_2_class_prune_th (for class removal)
     // Remove class if deviation to the best is higher than md_stage_2_class_prune_th
 #if MULTI_PASS_PD
@@ -2217,7 +2298,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #endif
 #if M0_OPT
 #if SC_PRESETS_OPT
+#if MR_MD_STAGE_2_CLASS_PRUNE_TH
+    if (1)
+#else
     if (MR_MODE || (picture_control_set_ptr->enc_mode == ENC_M0 && (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)))
+#endif
 #else
     if (MR_MODE)
 #endif
@@ -2256,7 +2341,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     else
 #endif
 #if ENHANCED_SQ_WEIGHT || FASTER_SQ_WEIGHT
+#if MR_SQ_WEIGHT
+    if (1)
+#else
     if (MR_MODE || picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
+#endif
 #else
     if (MR_MODE)
 #endif
@@ -2290,8 +2379,13 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         context_ptr->full_pel_ref_window_height_th = FULL_PEL_REF_WINDOW_HEIGHT;
     }
     else {
+#if M1_FULL_PEL_REF_WINDOW
+        context_ptr->full_pel_ref_window_width_th = FULL_PEL_REF_WINDOW_WIDTH;
+        context_ptr->full_pel_ref_window_height_th = FULL_PEL_REF_WINDOW_HEIGHT;
+#else
         context_ptr->full_pel_ref_window_width_th = (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected == 0 && picture_control_set_ptr->enc_mode == ENC_M0) ? FULL_PEL_REF_WINDOW_WIDTH_EXTENDED : FULL_PEL_REF_WINDOW_WIDTH;
         context_ptr->full_pel_ref_window_height_th = (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected == 0 && picture_control_set_ptr->enc_mode == ENC_M0) ? FULL_PEL_REF_WINDOW_HEIGHT_EXTENDED : FULL_PEL_REF_WINDOW_HEIGHT;
+#endif
     }
 
     // set compound_types_to_try
@@ -2428,6 +2522,17 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #else
     else if (MR_MODE || picture_control_set_ptr->parent_pcs_ptr->sequence_control_set_ptr->static_config.encoder_bit_depth > EB_8BIT)
 #endif
+        context_ptr->enable_auto_max_partition = 0;
+    else
+        context_ptr->enable_auto_max_partition = sequence_control_set_ptr->static_config.enable_auto_max_partition;
+#endif
+
+#if M1_AUTO_MAX_PARTITION
+    if (context_ptr->pd_pass == PD_PASS_0)
+        context_ptr->enable_auto_max_partition = 0;
+    else if (context_ptr->pd_pass == PD_PASS_1)
+        context_ptr->enable_auto_max_partition = 0;
+    else if (picture_control_set_ptr->parent_pcs_ptr->sequence_control_set_ptr->static_config.encoder_bit_depth > EB_8BIT)
         context_ptr->enable_auto_max_partition = 0;
     else
         context_ptr->enable_auto_max_partition = sequence_control_set_ptr->static_config.enable_auto_max_partition;
