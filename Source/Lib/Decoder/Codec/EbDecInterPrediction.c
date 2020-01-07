@@ -26,7 +26,7 @@
 #include "EbDecUtils.h"
 #include "EbDecObmc.h"
 
-#include "../../Encoder/Codec/aom_dsp_rtcd.h"
+#include "common_dsp_rtcd.h"
 
 #include "EbDecProcessFrame.h"
 #include "EbDecIntraPrediction.h"

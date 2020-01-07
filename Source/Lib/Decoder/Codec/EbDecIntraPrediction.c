@@ -16,7 +16,7 @@
 
 #include <string.h>
 
-#include "../../Encoder/Codec/aom_dsp_rtcd.h"
+#include "common_dsp_rtcd.h"
 
 #include "EbSvtAv1Dec.h"
 #include "EbDecHandle.h"

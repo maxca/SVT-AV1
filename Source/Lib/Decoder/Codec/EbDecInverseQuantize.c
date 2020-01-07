@@ -23,7 +23,8 @@
 #include "EbObuParse.h"
 #include "EbDecProcessFrame.h"
 
-#include "../../Encoder/Codec/EbTransforms.h"
+//#include "../../Encoder/Codec/EbTransforms.h"
+#include "EbCoefficients.h"
 #include "EbQMatrices.h"
 
 // Same wrapper(av1_ac/dc_quant_qtx) available in .c file of encoder

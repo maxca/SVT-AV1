@@ -24,7 +24,7 @@
 #include "EbDecNbr.h"
 #include "EbDecUtils.h"
 #include "EbDecInterPrediction.h"
-#include "../../Encoder/Codec/aom_dsp_rtcd.h"
+#include "common_dsp_rtcd.h"
 #include "EbLog.h"
 
 //This function is present in encoder also, but encoder structures & decoder structures are different.

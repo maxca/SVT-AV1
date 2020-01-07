@@ -95,29 +95,29 @@ static INLINE int32_t check_xcr0_ymm() {
     return ((xcr0 & 6) == 6); /* checking if xmm and ymm state are enabled in XCR0 */
 }
 
-static int32_t check_4thgen_intel_core_features() {
-    int32_t abcd[4];
-    int32_t fma_movbe_osxsave_mask = ((1 << 12) | (1 << 22) | (1 << 27));
-    int32_t avx2_bmi12_mask        = (1 << 5) | (1 << 3) | (1 << 8);
-
-    /* CPUID.(EAX=01H, ECX=0H):ECX.FMA[bit 12]==1   &&
-    CPUID.(EAX=01H, ECX=0H):ECX.MOVBE[bit 22]==1 &&
-    CPUID.(EAX=01H, ECX=0H):ECX.OSXSAVE[bit 27]==1 */
-    run_cpuid(1, 0, abcd);
-    if ((abcd[2] & fma_movbe_osxsave_mask) != fma_movbe_osxsave_mask) return 0;
-
-    if (!check_xcr0_ymm()) return 0;
-
-    /*  CPUID.(EAX=07H, ECX=0H):EBX.AVX2[bit 5]==1  &&
-    CPUID.(EAX=07H, ECX=0H):EBX.BMI1[bit 3]==1  &&
-    CPUID.(EAX=07H, ECX=0H):EBX.BMI2[bit 8]==1  */
-    run_cpuid(7, 0, abcd);
-    if ((abcd[1] & avx2_bmi12_mask) != avx2_bmi12_mask) return 0;
-    /* CPUID.(EAX=80000001H):ECX.LZCNT[bit 5]==1 */
-    run_cpuid(0x80000001, 0, abcd);
-    if ((abcd[2] & (1 << 5)) == 0) return 0;
-    return 1;
-}
+//static int32_t check_4thgen_intel_core_features() {
+//    int32_t abcd[4];
+//    int32_t fma_movbe_osxsave_mask = ((1 << 12) | (1 << 22) | (1 << 27));
+//    int32_t avx2_bmi12_mask        = (1 << 5) | (1 << 3) | (1 << 8);
+//
+//    /* CPUID.(EAX=01H, ECX=0H):ECX.FMA[bit 12]==1   &&
+//    CPUID.(EAX=01H, ECX=0H):ECX.MOVBE[bit 22]==1 &&
+//    CPUID.(EAX=01H, ECX=0H):ECX.OSXSAVE[bit 27]==1 */
+//    run_cpuid(1, 0, abcd);
+//    if ((abcd[2] & fma_movbe_osxsave_mask) != fma_movbe_osxsave_mask) return 0;
+//
+//    if (!check_xcr0_ymm()) return 0;
+//
+//    /*  CPUID.(EAX=07H, ECX=0H):EBX.AVX2[bit 5]==1  &&
+//    CPUID.(EAX=07H, ECX=0H):EBX.BMI1[bit 3]==1  &&
+//    CPUID.(EAX=07H, ECX=0H):EBX.BMI2[bit 8]==1  */
+//    run_cpuid(7, 0, abcd);
+//    if ((abcd[1] & avx2_bmi12_mask) != avx2_bmi12_mask) return 0;
+//    /* CPUID.(EAX=80000001H):ECX.LZCNT[bit 5]==1 */
+//    run_cpuid(0x80000001, 0, abcd);
+//    if ((abcd[2] & (1 << 5)) == 0) return 0;
+//    return 1;
+//}
 
 static INLINE int check_xcr0_zmm() {
     uint32_t xcr0;
@@ -131,61 +131,61 @@ static INLINE int check_xcr0_zmm() {
             zmm_ymm_xmm); /* check if xmm, ymm and zmm state are enabled in XCR0 */
 }
 
-static int32_t can_use_intel_avx512() {
-    int abcd[4];
+//static int32_t can_use_intel_avx512() {
+//    int abcd[4];
+//
+//    /*  CPUID.(EAX=07H, ECX=0):EBX[bit 16]==1 AVX512F
+//    CPUID.(EAX=07H, ECX=0):EBX[bit 17] AVX512DQ
+//    CPUID.(EAX=07H, ECX=0):EBX[bit 28] AVX512CD
+//    CPUID.(EAX=07H, ECX=0):EBX[bit 30] AVX512BW
+//    CPUID.(EAX=07H, ECX=0):EBX[bit 31] AVX512VL */
+//
+//    int avx512_ebx_mask = (1 << 16) // AVX-512F
+//                          | (1 << 17) // AVX-512DQ
+//                          | (1 << 28) // AVX-512CD
+//                          | (1 << 30) // AVX-512BW
+//                          | (1 << 31); // AVX-512VL
+//
+//    if (!check_4thgen_intel_core_features()) return 0;
+//
+//    // ensure OS supports ZMM registers (and YMM, and XMM)
+//    if (!check_xcr0_zmm()) return 0;
+//
+//    run_cpuid(7, 0, abcd);
+//    if ((abcd[1] & avx512_ebx_mask) != avx512_ebx_mask) return 0;
+//
+//    return 1;
+//}
 
-    /*  CPUID.(EAX=07H, ECX=0):EBX[bit 16]==1 AVX512F
-    CPUID.(EAX=07H, ECX=0):EBX[bit 17] AVX512DQ
-    CPUID.(EAX=07H, ECX=0):EBX[bit 28] AVX512CD
-    CPUID.(EAX=07H, ECX=0):EBX[bit 30] AVX512BW
-    CPUID.(EAX=07H, ECX=0):EBX[bit 31] AVX512VL */
+//CPU_FLAGS get_cpu_flags() {
+//    CPU_FLAGS flags = 0;
+//
+//    /* To detail tests CPU features, requires more accurate implementation.
+//        Documentation help:
+//        https://docs.microsoft.com/en-us/cpp/intrinsics/cpuid-cpuidex?redirectedfrom=MSDN&view=vs-2019
+//    */
+//
+//    if (check_4thgen_intel_core_features()) {
+//        flags |= CPU_FLAGS_MMX | CPU_FLAGS_SSE | CPU_FLAGS_SSE2 | CPU_FLAGS_SSE3 | CPU_FLAGS_SSSE3 |
+//                 CPU_FLAGS_SSE4_1 | CPU_FLAGS_SSE4_2 | CPU_FLAGS_AVX | CPU_FLAGS_AVX2;
+//    }
+//
+//    if (can_use_intel_avx512()) {
+//        flags |= CPU_FLAGS_AVX512F | CPU_FLAGS_AVX512DQ | CPU_FLAGS_AVX512CD | CPU_FLAGS_AVX512BW |
+//                 CPU_FLAGS_AVX512VL;
+//    }
+//
+//    return flags;
+//}
 
-    int avx512_ebx_mask = (1 << 16) // AVX-512F
-                          | (1 << 17) // AVX-512DQ
-                          | (1 << 28) // AVX-512CD
-                          | (1 << 30) // AVX-512BW
-                          | (1 << 31); // AVX-512VL
-
-    if (!check_4thgen_intel_core_features()) return 0;
-
-    // ensure OS supports ZMM registers (and YMM, and XMM)
-    if (!check_xcr0_zmm()) return 0;
-
-    run_cpuid(7, 0, abcd);
-    if ((abcd[1] & avx512_ebx_mask) != avx512_ebx_mask) return 0;
-
-    return 1;
-}
-
-CPU_FLAGS get_cpu_flags() {
-    CPU_FLAGS flags = 0;
-
-    /* To detail tests CPU features, requires more accurate implementation.
-        Documentation help:
-        https://docs.microsoft.com/en-us/cpp/intrinsics/cpuid-cpuidex?redirectedfrom=MSDN&view=vs-2019
-    */
-
-    if (check_4thgen_intel_core_features()) {
-        flags |= CPU_FLAGS_MMX | CPU_FLAGS_SSE | CPU_FLAGS_SSE2 | CPU_FLAGS_SSE3 | CPU_FLAGS_SSSE3 |
-                 CPU_FLAGS_SSE4_1 | CPU_FLAGS_SSE4_2 | CPU_FLAGS_AVX | CPU_FLAGS_AVX2;
-    }
-
-    if (can_use_intel_avx512()) {
-        flags |= CPU_FLAGS_AVX512F | CPU_FLAGS_AVX512DQ | CPU_FLAGS_AVX512CD | CPU_FLAGS_AVX512BW |
-                 CPU_FLAGS_AVX512VL;
-    }
-
-    return flags;
-}
-
-CPU_FLAGS get_cpu_flags_to_use() {
-    CPU_FLAGS flags = get_cpu_flags();
-#ifdef NON_AVX512_SUPPORT
-    /* Remove AVX512 flags. */
-    flags &= (CPU_FLAGS_AVX512F - 1);
-#endif
-    return flags;
-}
+//CPU_FLAGS get_cpu_flags_to_use() {
+//    CPU_FLAGS flags = get_cpu_flags();
+//#ifdef NON_AVX512_SUPPORT
+//    /* Remove AVX512 flags. */
+//    flags &= (CPU_FLAGS_AVX512F - 1);
+//#endif
+//    return flags;
+//}
 
 #ifndef NON_AVX512_SUPPORT
 #define SET_FUNCTIONS(ptr, c, mmx, sse, sse2, sse3, ssse3, sse4_1, sse4_2, avx, avx2, avx512) \
@@ -260,11 +260,8 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
     aom_highbd_subtract_block = aom_highbd_subtract_block_c;
     if (flags & HAS_AVX2) aom_highbd_subtract_block = aom_highbd_subtract_block_sse2;
     if (flags & HAS_AVX2) aom_sse = aom_sse_avx2;
-    av1_build_compound_diffwtd_mask_d16 = av1_build_compound_diffwtd_mask_d16_c;
     aom_highbd_sse                      = aom_highbd_sse_c;
     if (flags & HAS_AVX2) aom_highbd_sse = aom_highbd_sse_avx2;
-    if (flags & HAS_AVX2)
-        av1_build_compound_diffwtd_mask_d16 = av1_build_compound_diffwtd_mask_d16_avx2;
     aom_lowbd_blend_a64_d16_mask = aom_lowbd_blend_a64_d16_mask_c;
     if (flags & HAS_AVX2) aom_lowbd_blend_a64_d16_mask = aom_lowbd_blend_a64_d16_mask_avx2;
     aom_highbd_blend_a64_d16_mask = aom_highbd_blend_a64_d16_mask_c;
@@ -304,8 +301,6 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
     eb_av1_lowbd_pixel_proj_error  = eb_av1_lowbd_pixel_proj_error_c;
     eb_av1_highbd_pixel_proj_error = eb_av1_highbd_pixel_proj_error_c;
     if (flags & HAS_AVX2) eb_av1_highbd_pixel_proj_error = eb_av1_highbd_pixel_proj_error_avx2;
-    eb_av1_filter_intra_edge_high = eb_av1_filter_intra_edge_high_c;
-    if (flags & HAS_SSE4_1) eb_av1_filter_intra_edge_high = eb_av1_filter_intra_edge_high_sse4_1;
     eb_av1_calc_frame_error = eb_av1_calc_frame_error_c;
     if (flags & HAS_AVX2) eb_av1_calc_frame_error = eb_av1_calc_frame_error_avx2;
     eb_av1_highbd_convolve_2d_copy_sr = eb_av1_highbd_convolve_2d_copy_sr_c;
@@ -332,10 +327,6 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
     if (flags & HAS_AVX2) eb_av1_highbd_convolve_x_sr = eb_av1_highbd_convolve_x_sr_avx2;
     eb_subtract_average = eb_subtract_average_c;
     if (flags & HAS_AVX2) eb_subtract_average = eb_subtract_average_avx2;
-
-    eb_av1_filter_intra_edge = eb_av1_filter_intra_edge_high_c_old;
-
-    if (flags & HAS_SSE4_1) eb_av1_filter_intra_edge = eb_av1_filter_intra_edge_sse4_1;
 
     get_proj_subspace = get_proj_subspace_c;
     if (flags & HAS_AVX2) get_proj_subspace = get_proj_subspace_avx2;
@@ -438,14 +429,9 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
     eb_aom_highbd_8_mse16x16 = eb_aom_highbd_8_mse16x16_c;
     if (flags & HAS_SSE2) eb_aom_highbd_8_mse16x16 = eb_aom_highbd_8_mse16x16_sse2;
 
-    eb_av1_upsample_intra_edge = eb_av1_upsample_intra_edge_c;
-    if (flags & HAS_SSE4_1) eb_av1_upsample_intra_edge = eb_av1_upsample_intra_edge_sse4_1;
-
     eb_av1_warp_affine = eb_av1_warp_affine_c;
     if (flags & HAS_AVX2) eb_av1_warp_affine = eb_av1_warp_affine_avx2;
 
-    eb_av1_filter_intra_predictor = eb_av1_filter_intra_predictor_c;
-    if (flags & HAS_SSE4_1) eb_av1_filter_intra_predictor = eb_av1_filter_intra_predictor_sse4_1;
     eb_aom_highbd_smooth_v_predictor_16x16 = eb_aom_highbd_smooth_v_predictor_16x16_c;
     if (flags & HAS_AVX2)
         eb_aom_highbd_smooth_v_predictor_16x16 = eb_aom_highbd_smooth_v_predictor_16x16_avx2;
@@ -517,11 +503,6 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
     }
 #endif // !NON_AVX512_SUPPORT
 
-    eb_cfl_predict_lbd = eb_cfl_predict_lbd_c;
-    if (flags & HAS_AVX2) eb_cfl_predict_lbd = eb_cfl_predict_lbd_avx2;
-    eb_cfl_predict_hbd = eb_cfl_predict_hbd_c;
-    if (flags & HAS_AVX2) eb_cfl_predict_hbd = eb_cfl_predict_hbd_avx2;
-
     eb_av1_dr_prediction_z1 = eb_av1_dr_prediction_z1_c;
     if (flags & HAS_AVX2) eb_av1_dr_prediction_z1 = eb_av1_dr_prediction_z1_avx2;
     eb_av1_dr_prediction_z2 = eb_av1_dr_prediction_z2_c;
@@ -536,20 +517,6 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
     if (flags & HAS_AVX2) eb_av1_highbd_dr_prediction_z3 = eb_av1_highbd_dr_prediction_z3_avx2;
     eb_av1_get_nz_map_contexts = eb_av1_get_nz_map_contexts_c;
     if (flags & HAS_SSE2) eb_av1_get_nz_map_contexts = eb_av1_get_nz_map_contexts_sse2;
-    aom_blend_a64_mask = aom_blend_a64_mask_c;
-    if (flags & HAS_SSE4_1) aom_blend_a64_mask = aom_blend_a64_mask_sse4_1;
-    if (flags & HAS_AVX2) aom_blend_a64_mask = aom_blend_a64_mask_avx2;
-    aom_blend_a64_hmask = aom_blend_a64_hmask_c;
-    if (flags & HAS_SSE4_1) aom_blend_a64_hmask = aom_blend_a64_hmask_sse4_1;
-    aom_blend_a64_vmask = aom_blend_a64_vmask_c;
-    if (flags & HAS_SSE4_1) aom_blend_a64_vmask = aom_blend_a64_vmask_sse4_1;
-
-    aom_highbd_blend_a64_mask = aom_highbd_blend_a64_mask_c;
-    if (flags & HAS_SSE4_1) aom_highbd_blend_a64_mask = aom_highbd_blend_a64_mask_sse4_1;
-    aom_highbd_blend_a64_hmask = aom_highbd_blend_a64_hmask_c;
-    if (flags & HAS_SSE4_1) aom_highbd_blend_a64_hmask = aom_highbd_blend_a64_hmask_sse4_1;
-    aom_highbd_blend_a64_vmask = aom_highbd_blend_a64_vmask_c;
-    if (flags & HAS_SSE4_1) aom_highbd_blend_a64_vmask = aom_highbd_blend_a64_vmask_sse4_1;
 
     eb_aom_paeth_predictor_16x16 = eb_aom_paeth_predictor_16x16_c;
     if (flags & HAS_SSSE3) eb_aom_paeth_predictor_16x16 = eb_aom_paeth_predictor_16x16_ssse3;
@@ -1119,10 +1086,6 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
     }
 #endif // !NON_AVX512_SUPPORT
 
-    eb_aom_highbd_blend_a64_vmask = eb_aom_highbd_blend_a64_vmask_c;
-    if (flags & HAS_SSE4_1) eb_aom_highbd_blend_a64_vmask = eb_aom_highbd_blend_a64_vmask_sse4_1;
-    eb_aom_highbd_blend_a64_hmask = eb_aom_highbd_blend_a64_hmask_c;
-    if (flags & HAS_SSE4_1) eb_aom_highbd_blend_a64_hmask = eb_aom_highbd_blend_a64_hmask_sse4_1;
 
     aom_convolve8_horiz = aom_convolve8_horiz_c;
     if (flags & HAS_AVX2) aom_convolve8_horiz = aom_convolve8_horiz_avx2;

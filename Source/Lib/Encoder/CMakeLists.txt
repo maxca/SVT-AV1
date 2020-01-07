@@ -13,11 +13,11 @@ set(ENC_VERSION ${ENC_VERSION_MAJOR}.${ENC_VERSION_MINOR}.${ENC_VERSION_PATCH})
 # Include Encoder Subdirectories
 include_directories(${PROJECT_SOURCE_DIR}/Source/API/
     ${PROJECT_SOURCE_DIR}/Source/Lib/Common/Codec/
-#    ${PROJECT_SOURCE_DIR}/Source/Lib/Common/C_DEFAULT/
-#    ${PROJECT_SOURCE_DIR}/Source/Lib/Common/ASM_SSE2/
+    ${PROJECT_SOURCE_DIR}/Source/Lib/Common/C_DEFAULT/
+    ${PROJECT_SOURCE_DIR}/Source/Lib/Common/ASM_SSE2/
 #    ${PROJECT_SOURCE_DIR}/Source/Lib/Common/ASM_SSSE3/
-#    ${PROJECT_SOURCE_DIR}/Source/Lib/Common/ASM_SSE4_1/
-#    ${PROJECT_SOURCE_DIR}/Source/Lib/Common/ASM_AVX2/
+    ${PROJECT_SOURCE_DIR}/Source/Lib/Common/ASM_SSE4_1/
+    ${PROJECT_SOURCE_DIR}/Source/Lib/Common/ASM_AVX2/
 #    ${PROJECT_SOURCE_DIR}/Source/Lib/Common/ASM_AVX512/
     ${PROJECT_SOURCE_DIR}/Source/Lib/Encoder/C_DEFAULT/
     ${PROJECT_SOURCE_DIR}/Source/Lib/Encoder/ASM_SSE2/
@@ -30,10 +30,10 @@ include_directories(${PROJECT_SOURCE_DIR}/Source/API/
 
 link_directories(
 #        ${PROJECT_SOURCE_DIR}/Source/Lib/Common/ASM_SSE2/
-#    ${PROJECT_SOURCE_DIR}/Source/Lib/Common/C_DEFAULT/
+    ${PROJECT_SOURCE_DIR}/Source/Lib/Common/C_DEFAULT/
 #    ${PROJECT_SOURCE_DIR}/Source/Lib/Common/ASM_SSSE3/
-#    ${PROJECT_SOURCE_DIR}/Source/Lib/Common/ASM_SSE4_1/
-#    ${PROJECT_SOURCE_DIR}/Source/Lib/Common/ASM_AVX2/
+    ${PROJECT_SOURCE_DIR}/Source/Lib/Common/ASM_SSE4_1/
+    ${PROJECT_SOURCE_DIR}/Source/Lib/Common/ASM_AVX2/
 #    ${PROJECT_SOURCE_DIR}/Source/Lib/Common/ASM_AVX512/
     ${PROJECT_SOURCE_DIR}/Source/Lib/Common/Codec/
     ${PROJECT_SOURCE_DIR}/Source/Lib/Encoder/C_DEFAULT/
@@ -86,11 +86,11 @@ add_library(SvtAv1Enc
     ${all_files}
     $<TARGET_OBJECTS:COMMON_CODEC>
     $<TARGET_OBJECTS:FASTFEAT>
-#    $<TARGET_OBJECTS:COMMON_C_DEFAULT>
+    $<TARGET_OBJECTS:COMMON_C_DEFAULT>
 #    $<TARGET_OBJECTS:COMMON_ASM_SSE2>
 #    $<TARGET_OBJECTS:COMMON_ASM_SSSE3>
-#    $<TARGET_OBJECTS:COMMON_ASM_SSE4_1>
-#    $<TARGET_OBJECTS:COMMON_ASM_AVX2>
+    $<TARGET_OBJECTS:COMMON_ASM_SSE4_1>
+    $<TARGET_OBJECTS:COMMON_ASM_AVX2>
 #    $<TARGET_OBJECTS:COMMON_ASM_AVX512>
     $<TARGET_OBJECTS:ENCODER_GLOBALS>
     $<TARGET_OBJECTS:ENCODER_CODEC>
