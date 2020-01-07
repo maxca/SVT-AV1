@@ -16,8 +16,6 @@
 
 #include <string.h>
 
-#include "../../Encoder/Codec/EbIntraPrediction.h"
-#include "../../Encoder/Codec/EbCodingUnit.h"
 #include "../../Encoder/Codec/aom_dsp_rtcd.h"
 
 #include "EbSvtAv1Dec.h"

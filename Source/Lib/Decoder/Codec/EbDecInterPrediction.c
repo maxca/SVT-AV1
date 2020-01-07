@@ -15,9 +15,6 @@
 */
 
 #include <stdlib.h>
-#include <string.h>
-
-#include "../../Encoder/Codec/EbInterPrediction.h"
 
 #include "EbSvtAv1Dec.h"
 #include "EbDecHandle.h"

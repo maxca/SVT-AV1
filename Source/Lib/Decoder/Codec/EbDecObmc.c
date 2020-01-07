@@ -14,8 +14,7 @@
 * PATENTS file, you can obtain it at www.aomedia.org/license/patent.
 */
 
-#include "../../Encoder/Codec/EbCodingUnit.h"
-#include "../../Encoder/Codec/EbInterPrediction.h"
+#include <stdlib.h>
 
 #include "EbSvtAv1Dec.h"
 #include "EbDecHandle.h"

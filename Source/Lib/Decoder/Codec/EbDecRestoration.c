@@ -17,7 +17,6 @@
 #include "EbDefinitions.h"
 #include "EbDecUtils.h"
 #include "EbDecProcessFrame.h"
-#include "../../Encoder/Codec/EbRestoration.h"
 
 #define LR_PAD_SIDE 3
 #define LR_PAD_MAX (LR_PAD_SIDE << 1)
