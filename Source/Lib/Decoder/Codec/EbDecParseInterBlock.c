@@ -15,7 +15,7 @@
 */
 
 #include "EbDecParseInterBlock.h"
-#include "../../Encoder/Codec/EbCommonUtils.h"
+#include "EbSharedUtils.h"
 
 typedef const int (*ColorCost)[PALETTE_SIZES][PALETTE_COLOR_INDEX_CONTEXTS][PALETTE_COLORS];
 typedef AomCdfProb (*MapCdf)[PALETTE_SIZES][PALETTE_COLOR_INDEX_CONTEXTS];
