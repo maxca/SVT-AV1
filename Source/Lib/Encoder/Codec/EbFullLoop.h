@@ -8,6 +8,7 @@
 
 #include "EbModeDecisionProcess.h"
 #include "EbCommonUtils.h"
+#include "EbInvTransforms.h"
 #include "EbTransforms.h"
 
 #ifdef __cplusplus

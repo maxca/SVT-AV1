@@ -23,7 +23,7 @@
 #include "EbObuParse.h"
 
 #include "EbDecParseHelper.h"
-#include "../../Encoder/Codec/EbTransforms.h"
+#include "EbInvTransforms.h"
 
 #include "EbDecNbr.h"
 #include "EbDecPicMgr.h"

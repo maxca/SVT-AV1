@@ -27,7 +27,8 @@
 #include "EbDecNbr.h"
 #include "EbDecUtils.h"
 
-#include "../../Encoder/Codec/EbTransforms.h"
+#include "EbInvTransforms.h"
+
 #include "EbDecLF.h"
 #include "EbDecPicMgr.h"
 
