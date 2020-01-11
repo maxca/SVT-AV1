@@ -3551,6 +3551,8 @@ static void build_intra_predictors(
     assert(n_left_px >= 0);
     assert(n_bottomleft_px >= 0);
 
+    //printf("n_top_px = %d, n_left_px = %d\n", n_top_px, n_top_px);
+
     if ((!need_above && n_left_px == 0) || (!need_left && n_top_px == 0)) {
         int32_t val;
         if (need_left)

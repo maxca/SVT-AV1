@@ -841,6 +841,13 @@ typedef struct PictureParentControlSet {
 #endif
     uint8_t tx_size_early_exit;
 
+    SbParams *sb_params_array;
+    EbInputResolution input_resolution;
+    uint16_t picture_sb_width;
+    uint16_t picture_sb_height;
+
+    SbGeom *  sb_geom;
+
 } PictureParentControlSet;
 
 typedef struct PictureControlSetInitData {

@@ -3554,6 +3554,7 @@ void tx_type_search(SequenceControlSet *scs_ptr, PictureControlSet *pcs_ptr,
     context_ptr->luma_txb_skip_context = 0;
     context_ptr->luma_dc_sign_context  = 0;
     get_txb_ctx(scs_ptr,
+                pcs_ptr,
                 COMPONENT_LUMA,
                 context_ptr->full_loop_luma_dc_sign_level_coeff_neighbor_array,
                 context_ptr->sb_origin_x + txb_origin_x,

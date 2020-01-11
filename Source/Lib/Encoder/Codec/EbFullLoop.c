@@ -1846,6 +1846,7 @@ void product_full_loop(ModeDecisionCandidateBuffer *candidate_buffer,
     context_ptr->luma_txb_skip_context = 0;
     context_ptr->luma_dc_sign_context  = 0;
     get_txb_ctx(scs_ptr,
+                pcs_ptr,
                 COMPONENT_LUMA,
                 context_ptr->full_loop_luma_dc_sign_level_coeff_neighbor_array,
                 context_ptr->sb_origin_x + tx_org_x,
@@ -2148,6 +2149,7 @@ void product_full_loop_tx_search(ModeDecisionCandidateBuffer *candidate_buffer,
             context_ptr->luma_txb_skip_context = 0;
             context_ptr->luma_dc_sign_context  = 0;
             get_txb_ctx(scs_ptr,
+                        pcs_ptr,
                         COMPONENT_LUMA,
                         context_ptr->luma_dc_sign_level_coeff_neighbor_array,
                         context_ptr->sb_origin_x + txb_origin_x,
@@ -2801,6 +2803,7 @@ void full_loop_r(SuperBlock *sb_ptr, ModeDecisionCandidateBuffer *candidate_buff
         context_ptr->cb_txb_skip_context = 0;
         context_ptr->cb_dc_sign_context  = 0;
         get_txb_ctx(scs_ptr,
+                    pcs_ptr,
                     COMPONENT_CHROMA,
                     context_ptr->cb_dc_sign_level_coeff_neighbor_array,
                     ROUND_UV(context_ptr->sb_origin_x + txb_origin_x) >> 1,
@@ -2813,6 +2816,7 @@ void full_loop_r(SuperBlock *sb_ptr, ModeDecisionCandidateBuffer *candidate_buff
         context_ptr->cr_txb_skip_context = 0;
         context_ptr->cr_dc_sign_context  = 0;
         get_txb_ctx(scs_ptr,
+                    pcs_ptr,
                     COMPONENT_CHROMA,
                     context_ptr->cr_dc_sign_level_coeff_neighbor_array,
                     ROUND_UV(context_ptr->sb_origin_x + txb_origin_x) >> 1,

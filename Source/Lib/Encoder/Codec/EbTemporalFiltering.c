@@ -2163,7 +2163,278 @@ EbErrorType downscaled_source_buffer_desc_ctor(EbPictureBufferDesc **picture_ptr
     return EB_ErrorNone;
 }
 
-void scale_pcs_params(SequenceControlSet* scs_ptr,
+EbErrorType derive_input_resolution_pcs(PictureParentControlSet *pcs_ptr, uint32_t inputSize) {
+    EbErrorType return_error = EB_ErrorNone;
+
+    pcs_ptr->input_resolution =
+            (inputSize < INPUT_SIZE_1080i_TH)
+            ? INPUT_SIZE_576p_RANGE_OR_LOWER
+            : (inputSize < INPUT_SIZE_1080p_TH)
+              ? INPUT_SIZE_1080i_RANGE
+              : (inputSize < INPUT_SIZE_4K_TH) ? INPUT_SIZE_1080p_RANGE : INPUT_SIZE_4K_RANGE;
+
+    return return_error;
+}
+
+EbErrorType sb_params_init_pcs(SequenceControlSet *scs_ptr,
+                                      PictureParentControlSet *pcs_ptr) {
+    EbErrorType return_error = EB_ErrorNone;
+    uint16_t    sb_index;
+    uint16_t    raster_scan_blk_index;
+    // note here: mariana!!!
+    uint16_t encoding_width = pcs_ptr->av1_cm->frm_size.frame_width;
+    uint16_t encoding_height = pcs_ptr->av1_cm->frm_size.frame_height;
+
+    uint8_t     picture_sb_width =
+            (uint8_t)((encoding_width + scs_ptr->sb_sz - 1) / scs_ptr->sb_sz);
+    uint8_t picture_sb_height =
+            (uint8_t)((encoding_height + scs_ptr->sb_sz - 1) / scs_ptr->sb_sz);
+
+    EB_MALLOC_ARRAY(pcs_ptr->sb_params_array, picture_sb_width * picture_sb_height);
+
+    for (sb_index = 0; sb_index < picture_sb_width * picture_sb_height; ++sb_index) {
+        pcs_ptr->sb_params_array[sb_index].horizontal_index =
+                (uint8_t)(sb_index % picture_sb_width);
+        pcs_ptr->sb_params_array[sb_index].vertical_index = (uint8_t)(sb_index / picture_sb_width);
+        pcs_ptr->sb_params_array[sb_index].origin_x =
+                pcs_ptr->sb_params_array[sb_index].horizontal_index * scs_ptr->sb_sz;
+        pcs_ptr->sb_params_array[sb_index].origin_y =
+                pcs_ptr->sb_params_array[sb_index].vertical_index * scs_ptr->sb_sz;
+
+        pcs_ptr->sb_params_array[sb_index].width = (uint8_t)(
+                ((encoding_width - pcs_ptr->sb_params_array[sb_index].origin_x) <
+                 scs_ptr->sb_sz)
+                ? encoding_width - pcs_ptr->sb_params_array[sb_index].origin_x
+                : scs_ptr->sb_sz);
+
+        pcs_ptr->sb_params_array[sb_index].height = (uint8_t)(
+                ((encoding_height - pcs_ptr->sb_params_array[sb_index].origin_y) <
+                 scs_ptr->sb_sz)
+                ? encoding_height - pcs_ptr->sb_params_array[sb_index].origin_y
+                : scs_ptr->sb_sz);
+
+        pcs_ptr->sb_params_array[sb_index].is_complete_sb =
+                (uint8_t)(((pcs_ptr->sb_params_array[sb_index].width == scs_ptr->sb_sz) &&
+                           (pcs_ptr->sb_params_array[sb_index].height == scs_ptr->sb_sz))
+                          ? 1
+                          : 0);
+
+        pcs_ptr->sb_params_array[sb_index].is_edge_sb =
+                (pcs_ptr->sb_params_array[sb_index].origin_x < scs_ptr->sb_sz) ||
+                (pcs_ptr->sb_params_array[sb_index].origin_y < scs_ptr->sb_sz) ||
+                (pcs_ptr->sb_params_array[sb_index].origin_x >
+                encoding_width - scs_ptr->sb_sz) ||
+                (pcs_ptr->sb_params_array[sb_index].origin_y >
+                encoding_height - scs_ptr->sb_sz)
+                ? 1
+                : 0;
+
+        uint8_t potential_logo_sb = 0;
+
+        // 4K
+        /*__ 14 __         __ 14__*/
+        ///////////////////////////
+        //         |          |         //
+        //         8          8         //
+        //___14_ |          |_14___//
+        //                         //
+        //                         //
+        //-----------------------// |
+        //                         // 8
+        ///////////////////////////    |
+
+        // 1080p/720P
+        /*__ 7 __          __ 7__*/
+        ///////////////////////////
+        //         |          |         //
+        //         4          4         //
+        //___7__ |          |__7___//
+        //                         //
+        //                         //
+        //-----------------------// |
+        //                         // 4
+        ///////////////////////////    |
+
+        // 480P
+        /*__ 3 __          __ 3__*/
+        ///////////////////////////
+        //         |          |         //
+        //         2          2         //
+        //___3__ |          |__3___//
+        //                         //
+        //                         //
+        //-----------------------// |
+        //                         // 2
+        ///////////////////////////    |
+
+        if (pcs_ptr->input_resolution <= INPUT_SIZE_576p_RANGE_OR_LOWER) {
+            potential_logo_sb =
+                    (pcs_ptr->sb_params_array[sb_index].origin_x >=
+                     (encoding_width - (3 * scs_ptr->sb_sz))) &&
+                    (pcs_ptr->sb_params_array[sb_index].origin_y < 2 * scs_ptr->sb_sz)
+                    ? 1
+                    : potential_logo_sb;
+            potential_logo_sb =
+                    (pcs_ptr->sb_params_array[sb_index].origin_x < ((3 * scs_ptr->sb_sz))) &&
+                    (pcs_ptr->sb_params_array[sb_index].origin_y < 2 * scs_ptr->sb_sz)
+                    ? 1
+                    : potential_logo_sb;
+            potential_logo_sb = (pcs_ptr->sb_params_array[sb_index].origin_y >=
+                                 (encoding_height - (2 * scs_ptr->sb_sz)))
+                                ? 1
+                                : potential_logo_sb;
+        } else if (scs_ptr->input_resolution < INPUT_SIZE_4K_RANGE) {
+            potential_logo_sb =
+                    (pcs_ptr->sb_params_array[sb_index].origin_x >=
+                     (encoding_width - (7 * scs_ptr->sb_sz))) &&
+                    (pcs_ptr->sb_params_array[sb_index].origin_y < 4 * scs_ptr->sb_sz)
+                    ? 1
+                    : potential_logo_sb;
+            potential_logo_sb =
+                    (pcs_ptr->sb_params_array[sb_index].origin_x < ((7 * scs_ptr->sb_sz))) &&
+                    (pcs_ptr->sb_params_array[sb_index].origin_y < 4 * scs_ptr->sb_sz)
+                    ? 1
+                    : potential_logo_sb;
+            potential_logo_sb = (pcs_ptr->sb_params_array[sb_index].origin_y >=
+                                 (encoding_height - (4 * scs_ptr->sb_sz)))
+                                ? 1
+                                : potential_logo_sb;
+        } else {
+            potential_logo_sb =
+                    (pcs_ptr->sb_params_array[sb_index].origin_x >=
+                     (encoding_width - (14 * scs_ptr->sb_sz))) &&
+                    (pcs_ptr->sb_params_array[sb_index].origin_y < 8 * scs_ptr->sb_sz)
+                    ? 1
+                    : potential_logo_sb;
+            potential_logo_sb =
+                    (pcs_ptr->sb_params_array[sb_index].origin_x < ((14 * scs_ptr->sb_sz))) &&
+                    (pcs_ptr->sb_params_array[sb_index].origin_y < 8 * scs_ptr->sb_sz)
+                    ? 1
+                    : potential_logo_sb;
+            potential_logo_sb = (pcs_ptr->sb_params_array[sb_index].origin_y >=
+                                 (encoding_height - (8 * scs_ptr->sb_sz)))
+                                ? 1
+                                : potential_logo_sb;
+        }
+        pcs_ptr->sb_params_array[sb_index].potential_logo_sb = potential_logo_sb;
+
+        for (raster_scan_blk_index = RASTER_SCAN_CU_INDEX_64x64;
+             raster_scan_blk_index <= RASTER_SCAN_CU_INDEX_8x8_63;
+             raster_scan_blk_index++) {
+            pcs_ptr->sb_params_array[sb_index].raster_scan_blk_validity[raster_scan_blk_index] =
+                    ((pcs_ptr->sb_params_array[sb_index].origin_x +
+                      raster_scan_blk_x[raster_scan_blk_index] +
+                      raster_scan_blk_size[raster_scan_blk_index] >
+                      encoding_width) ||
+                     (pcs_ptr->sb_params_array[sb_index].origin_y +
+                      raster_scan_blk_y[raster_scan_blk_index] +
+                      raster_scan_blk_size[raster_scan_blk_index] >
+                      encoding_height))
+                    ? EB_FALSE
+                    : EB_TRUE;
+        }
+    }
+
+    return return_error;
+}
+
+EbErrorType sb_geom_init_pcs(SequenceControlSet *scs_ptr, PictureParentControlSet *pcs_ptr) {
+    uint16_t sb_index;
+    uint16_t md_scan_block_index;
+
+    uint16_t encoding_width = pcs_ptr->av1_cm->frm_size.frame_width;
+    uint16_t encoding_height = pcs_ptr->av1_cm->frm_size.frame_height;
+
+    uint16_t picture_sb_width =
+            (encoding_width + scs_ptr->sb_size_pix - 1) / scs_ptr->sb_size_pix;
+    uint16_t picture_sb_height =
+            (encoding_height + scs_ptr->sb_size_pix - 1) / scs_ptr->sb_size_pix;
+
+    EB_MALLOC_ARRAY(pcs_ptr->sb_geom, picture_sb_width * picture_sb_height);
+
+    for (sb_index = 0; sb_index < picture_sb_width * picture_sb_height; ++sb_index) {
+        pcs_ptr->sb_geom[sb_index].horizontal_index = sb_index % picture_sb_width;
+        pcs_ptr->sb_geom[sb_index].vertical_index   = sb_index / picture_sb_width;
+        pcs_ptr->sb_geom[sb_index].origin_x =
+                pcs_ptr->sb_geom[sb_index].horizontal_index * scs_ptr->sb_size_pix;
+        pcs_ptr->sb_geom[sb_index].origin_y =
+                pcs_ptr->sb_geom[sb_index].vertical_index * scs_ptr->sb_size_pix;
+
+        pcs_ptr->sb_geom[sb_index].width = (uint8_t)(
+                ((encoding_width - pcs_ptr->sb_geom[sb_index].origin_x) <
+                 scs_ptr->sb_size_pix)
+                ? encoding_width - pcs_ptr->sb_geom[sb_index].origin_x
+                : scs_ptr->sb_size_pix);
+
+        pcs_ptr->sb_geom[sb_index].height = (uint8_t)(
+                ((encoding_height - pcs_ptr->sb_geom[sb_index].origin_y) <
+                 scs_ptr->sb_size_pix)
+                ? encoding_height - pcs_ptr->sb_geom[sb_index].origin_y
+                : scs_ptr->sb_size_pix);
+
+        pcs_ptr->sb_geom[sb_index].is_complete_sb =
+                (uint8_t)(((pcs_ptr->sb_geom[sb_index].width == scs_ptr->sb_size_pix) &&
+                           (pcs_ptr->sb_geom[sb_index].height == scs_ptr->sb_size_pix))
+                          ? 1
+                          : 0);
+
+        uint16_t max_block_count = scs_ptr->max_block_cnt;
+
+        for (md_scan_block_index = 0; md_scan_block_index < max_block_count;
+             md_scan_block_index++) {
+            const BlockGeom *blk_geom = get_blk_geom_mds(md_scan_block_index);
+            if (scs_ptr->over_boundary_block_mode == 1) {
+                pcs_ptr->sb_geom[sb_index].block_is_allowed[md_scan_block_index] =
+                        ((pcs_ptr->sb_geom[sb_index].origin_x + blk_geom->origin_x +
+                          blk_geom->bwidth / 2 <
+                          encoding_width) &&
+                         (pcs_ptr->sb_geom[sb_index].origin_y + blk_geom->origin_y +
+                          blk_geom->bheight / 2 <
+                          encoding_height))
+                        ? EB_TRUE
+                        : EB_FALSE;
+
+                // Temporary if the cropped width is not 4, 8, 16, 32, 64 and 128, the block is not allowed. To be removed after intrinsic functions for NxM spatial_full_distortion_kernel_func_ptr_array are added
+                int32_t cropped_width =
+                        MIN(blk_geom->bwidth,
+                            encoding_width -
+                            (pcs_ptr->sb_geom[sb_index].origin_x + blk_geom->origin_x));
+                if (cropped_width != 4 && cropped_width != 8 && cropped_width != 16 &&
+                    cropped_width != 32 && cropped_width != 64 && cropped_width != 128)
+                    pcs_ptr->sb_geom[sb_index].block_is_allowed[md_scan_block_index] = EB_FALSE;
+
+                if (blk_geom->shape != PART_N) blk_geom = get_blk_geom_mds(blk_geom->sqi_mds);
+                pcs_ptr->sb_geom[sb_index].block_is_inside_md_scan[md_scan_block_index] =
+                        ((pcs_ptr->sb_geom[sb_index].origin_x >= encoding_width) ||
+                         (pcs_ptr->sb_geom[sb_index].origin_y >= encoding_height))
+                        ? EB_FALSE
+                        : EB_TRUE;
+            } else {
+                if (blk_geom->shape != PART_N) blk_geom = get_blk_geom_mds(blk_geom->sqi_mds);
+
+                pcs_ptr->sb_geom[sb_index].block_is_allowed[md_scan_block_index] =
+                        ((pcs_ptr->sb_geom[sb_index].origin_x + blk_geom->origin_x + blk_geom->bwidth >
+                          encoding_width) ||
+                         (pcs_ptr->sb_geom[sb_index].origin_y + blk_geom->origin_y + blk_geom->bheight >
+                          encoding_height))
+                        ? EB_FALSE
+                        : EB_TRUE;
+
+                pcs_ptr->sb_geom[sb_index].block_is_inside_md_scan[md_scan_block_index] =
+                        ((pcs_ptr->sb_geom[sb_index].origin_x + blk_geom->origin_x + blk_geom->bwidth >
+                          encoding_width) ||
+                         (pcs_ptr->sb_geom[sb_index].origin_y + blk_geom->origin_y + blk_geom->bheight >
+                          encoding_height))
+                        ? EB_FALSE
+                        : EB_TRUE;
+            }
+        }
+    }
+
+    return 0;
+}
+
+EbErrorType scale_pcs_params(SequenceControlSet* scs_ptr,
                       PictureParentControlSet* pcs_ptr,
                       superres_params_type spr_params,
                       uint16_t source_width,
@@ -2192,6 +2463,19 @@ void scale_pcs_params(SequenceControlSet* scs_ptr,
     cm->mi_cols = spr_params.encoding_width >> MI_SIZE_LOG2;
     cm->mi_rows = spr_params.encoding_height >> MI_SIZE_LOG2;
 
+    pcs_ptr->picture_sb_width = picture_sb_width;
+    pcs_ptr->picture_sb_height = picture_sb_height;
+
+    if(cm->frm_size.superres_denominator != SCALE_NUMERATOR){
+        derive_input_resolution_pcs(pcs_ptr, spr_params.encoding_width * spr_params.encoding_height);
+
+        // create new picture level sb_params and sb_geom
+        sb_params_init_pcs(scs_ptr, pcs_ptr);
+
+        sb_geom_init_pcs(scs_ptr, pcs_ptr);
+    }
+
+    return EB_ErrorNone;
 }
 
 void scale_frame_if_necessary(SequenceControlSet* scs_ptr,

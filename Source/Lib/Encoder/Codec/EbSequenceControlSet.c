@@ -412,6 +412,7 @@ extern EbErrorType sb_params_init(SequenceControlSet *scs_ptr) {
     EbErrorType return_error = EB_ErrorNone;
     uint16_t    sb_index;
     uint16_t    raster_scan_blk_index;
+    // note here: mariana!!!
     uint8_t     picture_sb_width =
         (uint8_t)((scs_ptr->seq_header.max_frame_width + scs_ptr->sb_sz - 1) / scs_ptr->sb_sz);
     uint8_t picture_sb_height =
