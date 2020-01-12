@@ -31,14 +31,14 @@ include_directories(${PROJECT_SOURCE_DIR}/Source/API/
         )
 
 link_directories(
-#        ${PROJECT_SOURCE_DIR}/Source/Lib/Common/ASM_SSE2/
+     ${PROJECT_SOURCE_DIR}/Source/Lib/Common/ASM_SSE2/
     ${PROJECT_SOURCE_DIR}/Source/Lib/Common/C_DEFAULT/
-#    ${PROJECT_SOURCE_DIR}/Source/Lib/Common/ASM_SSSE3/
-#    ${PROJECT_SOURCE_DIR}/Source/Lib/Common/ASM_SSE4_1/
+    ${PROJECT_SOURCE_DIR}/Source/Lib/Common/ASM_SSSE3/
+    ${PROJECT_SOURCE_DIR}/Source/Lib/Common/ASM_SSE4_1/
     ${PROJECT_SOURCE_DIR}/Source/Lib/Common/ASM_AVX2/
-#    ${PROJECT_SOURCE_DIR}/Source/Lib/Common/ASM_AVX512/
-#    ${PROJECT_SOURCE_DIR}/Source/Lib/Common/Codec/
-#    ${PROJECT_SOURCE_DIR}/Source/Lib/Decoder/Codec/
+    ${PROJECT_SOURCE_DIR}/Source/Lib/Common/ASM_AVX512/
+    ${PROJECT_SOURCE_DIR}/Source/Lib/Common/Codec/
+    ${PROJECT_SOURCE_DIR}/Source/Lib/Decoder/Codec/
     ${PROJECT_SOURCE_DIR}/Source/Lib/Encoder/Codec/
     ${PROJECT_SOURCE_DIR}/Source/Lib/Encoder/C_DEFAULT/
     ${PROJECT_SOURCE_DIR}/Source/Lib/Encoder/ASM_SSE2/
@@ -77,11 +77,11 @@ add_library(SvtAv1Dec
     $<TARGET_OBJECTS:COMMON_CODEC>
     $<TARGET_OBJECTS:FASTFEAT>
     $<TARGET_OBJECTS:COMMON_C_DEFAULT>
-#    $<TARGET_OBJECTS:COMMON_ASM_SSE2>
+    $<TARGET_OBJECTS:COMMON_ASM_SSE2>
     $<TARGET_OBJECTS:COMMON_ASM_SSSE3>
     $<TARGET_OBJECTS:COMMON_ASM_SSE4_1>
     $<TARGET_OBJECTS:COMMON_ASM_AVX2>
-#    $<TARGET_OBJECTS:COMMON_ASM_AVX512>
+    $<TARGET_OBJECTS:COMMON_ASM_AVX512>
      $<TARGET_OBJECTS:ENCODER_C_DEFAULT>
      $<TARGET_OBJECTS:ENCODER_ASM_SSE2>
      $<TARGET_OBJECTS:ENCODER_ASM_SSSE3>

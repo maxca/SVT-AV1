@@ -24,18 +24,18 @@
 //#include "EbTemporalFiltering_sse4.h"
 //#include "EbComputeSAD.h"
 //#include "EbMotionEstimation.h"
-//#include "EbPictureOperators.h"
-//#include "EbPackUnPack_C.h"
-//#include "EbPackUnPack_SSE2.h"
-//#include "EbPackUnPack_AVX2.h"
-//#include "EbMcp_SSE2.h"
-//#include "EbAvcStyleMcp_SSSE3.h"
+#include "EbPictureOperators.h"
+#include "EbPackUnPack_C.h"
+#include "EbPackUnPack_SSE2.h"
+#include "EbPackUnPack_AVX2.h"
+#include "EbMcp_SSE2.h"
+#include "EbAvcStyleMcp_SSSE3.h"
 //#include "EbComputeMean_SSE2.h"
 //#include "EbCombinedAveragingSAD_Intrinsic_AVX2.h"
 //#include "EbComputeMean.h"
-//#include "EbHmCode.h"
+#include "EbHmCode.h"
 //#include "EbMeSadCalculation.h"
-//#include "EbAvcStyleMcp.h"
+#include "EbAvcStyleMcp.h"
 
 /*
  * DSP deprecated flags
@@ -339,5 +339,49 @@ void setup_common_rtcd_internal(CPU_FLAGS flags) {
     eb_av1_inv_txfm_add = eb_av1_inv_txfm_add_c;
     if (flags & HAS_SSSE3) eb_av1_inv_txfm_add = eb_av1_inv_txfm_add_ssse3;
     if (flags & HAS_AVX2) eb_av1_inv_txfm_add = eb_av1_inv_txfm_add_avx2;
+
+    SET_AVX2(compressed_packmsb, compressed_packmsb_c, compressed_packmsb_avx2_intrin);
+    SET_AVX2(c_pack, c_pack_c, c_pack_avx2_intrin);
+    SET_SSE2_AVX2(unpack_avg, unpack_avg_c, unpack_avg_sse2_intrin, unpack_avg_avx2_intrin);
+    SET_AVX2(unpack_avg_safe_sub, unpack_avg_safe_sub_c, unpack_avg_safe_sub_avx2_intrin);
+    SET_AVX2(un_pack8_bit_data, un_pack8_bit_data_c, eb_enc_un_pack8_bit_data_avx2_intrin);
+
+    SET_SSE2_AVX2(pack2d_16_bit_src_mul4,
+                  eb_enc_msb_pack2_d,
+                  eb_enc_msb_pack2d_sse2_intrin,
+                  eb_enc_msb_pack2d_avx2_intrin_al);
+    SET_SSE2(un_pack2d_16_bit_src_mul4, eb_enc_msb_un_pack2_d, eb_enc_msb_un_pack2d_sse2_intrin);
+
+    SET_AVX2(full_distortion_kernel_cbf_zero32_bits,
+             full_distortion_kernel_cbf_zero32_bits_c,
+             full_distortion_kernel_cbf_zero32_bits_avx2);
+    SET_AVX2(full_distortion_kernel32_bits,
+             full_distortion_kernel32_bits_c,
+             full_distortion_kernel32_bits_avx2);
+
+    SET_AVX2_AVX512(spatial_full_distortion_kernel,
+                    spatial_full_distortion_kernel_c,
+                    spatial_full_distortion_kernel_avx2,
+                    spatial_full_distortion_kernel_avx512);
+    SET_AVX2(full_distortion_kernel16_bits,
+             full_distortion_kernel16_bits_c,
+             full_distortion_kernel16_bits_avx2);
+    SET_AVX2_AVX512(residual_kernel8bit,
+                    residual_kernel8bit_c,
+                    residual_kernel8bit_avx2,
+                    residual_kernel8bit_avx512);
+
+    SET_SSE2(residual_kernel16bit, residual_kernel16bit_c, residual_kernel16bit_sse2_intrin);
+
+    SET_SSE2(picture_average_kernel, picture_average_kernel_c, picture_average_kernel_sse2_intrin);
+    SET_SSE2(picture_average_kernel1_line,
+             picture_average_kernel1_line_c,
+             picture_average_kernel1_line_sse2_intrin);
+
+    SET_SSE41(compute8x8_satd_u8, compute8x8_satd_u8_c, compute8x8_satd_u8_sse4);
+
+    SET_SSSE3(avc_style_luma_interpolation_filter,
+              avc_style_luma_interpolation_filter_helper_c,
+              avc_style_luma_interpolation_filter_helper_ssse3);
 
 }

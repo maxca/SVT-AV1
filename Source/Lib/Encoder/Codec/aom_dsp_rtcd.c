@@ -25,9 +25,6 @@
 #include "EbComputeSAD.h"
 #include "EbMotionEstimation.h"
 #include "EbPictureOperators.h"
-#include "EbPackUnPack_C.h"
-#include "EbPackUnPack_SSE2.h"
-#include "EbPackUnPack_AVX2.h"
 #include "EbMcp_SSE2.h"
 #include "EbAvcStyleMcp_SSSE3.h"
 #include "EbComputeMean_SSE2.h"
@@ -37,25 +34,6 @@
 #include "EbMeSadCalculation.h"
 #include "EbAvcStyleMcp.h"
 
-/*
- * DSP deprecated flags
- */
-#define HAS_MMX CPU_FLAGS_MMX
-#define HAS_SSE CPU_FLAGS_SSE
-#define HAS_SSE2 CPU_FLAGS_SSE2
-#define HAS_SSE3 CPU_FLAGS_SSE3
-#define HAS_SSSE3 CPU_FLAGS_SSSE3
-#define HAS_SSE4_1 CPU_FLAGS_SSE4_1
-#define HAS_SSE4_2 CPU_FLAGS_SSE4_2
-#define HAS_AVX CPU_FLAGS_AVX
-#define HAS_AVX2 CPU_FLAGS_AVX2
-#define HAS_AVX512F CPU_FLAGS_AVX512F
-#define HAS_AVX512CD CPU_FLAGS_AVX512CD
-#define HAS_AVX512DQ CPU_FLAGS_AVX512DQ
-#define HAS_AVX512ER CPU_FLAGS_AVX512ER
-#define HAS_AVX512PF CPU_FLAGS_AVX512PF
-#define HAS_AVX512BW CPU_FLAGS_AVX512BW
-#define HAS_AVX512VL CPU_FLAGS_AVX512VL
 
 /**************************************
  * Instruction Set Support
@@ -217,19 +195,6 @@ static INLINE int check_xcr0_zmm() {
         if (((uintptr_t)NULL != (uintptr_t)avx2) && (flags & HAS_AVX2)) ptr = avx2;           \
     } while (0)
 #endif
-
-#define SET_SSE2(ptr, c, sse2) SET_FUNCTIONS(ptr, c, 0, 0, sse2, 0, 0, 0, 0, 0, 0, 0)
-#define SET_SSE2_AVX2(ptr, c, sse2, avx2) SET_FUNCTIONS(ptr, c, 0, 0, sse2, 0, 0, 0, 0, 0, avx2, 0)
-#define SET_SSSE3(ptr, c, ssse3) SET_FUNCTIONS(ptr, c, 0, 0, 0, 0, ssse3, 0, 0, 0, 0, 0)
-#define SET_SSE41(ptr, c, sse4_1) SET_FUNCTIONS(ptr, c, 0, 0, 0, 0, 0, sse4_1, 0, 0, 0, 0)
-#define SET_SSE41(ptr, c, sse4_1) SET_FUNCTIONS(ptr, c, 0, 0, 0, 0, 0, sse4_1, 0, 0, 0, 0)
-#define SET_SSE41_AVX2(ptr, c, sse4_1, avx2) \
-    SET_FUNCTIONS(ptr, c, 0, 0, 0, 0, 0, sse4_1, 0, 0, avx2, 0)
-#define SET_SSE41_AVX2_AVX512(ptr, c, sse4_1, avx2, avx512) \
-    SET_FUNCTIONS(ptr, c, 0, 0, 0, 0, 0, sse4_1, 0, 0, avx2, avx512)
-#define SET_AVX2(ptr, c, avx2) SET_FUNCTIONS(ptr, c, 0, 0, 0, 0, 0, 0, 0, 0, avx2, 0)
-#define SET_AVX2_AVX512(ptr, c, avx2, avx512) \
-    SET_FUNCTIONS(ptr, c, 0, 0, 0, 0, 0, 0, 0, 0, avx2, avx512)
 
 void setup_rtcd_internal(CPU_FLAGS flags) {
     /** Should be done during library initialization,
@@ -1871,17 +1836,6 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
                     eb_av1_wiener_convolve_add_src_avx512);
     SET_AVX2_AVX512(
         search_one_dual, search_one_dual_c, search_one_dual_avx2, search_one_dual_avx512);
-    SET_AVX2_AVX512(spatial_full_distortion_kernel,
-                    spatial_full_distortion_kernel_c,
-                    spatial_full_distortion_kernel_avx2,
-                    spatial_full_distortion_kernel_avx512);
-    SET_AVX2(full_distortion_kernel16_bits,
-             full_distortion_kernel16_bits_c,
-             full_distortion_kernel16_bits_avx2);
-    SET_AVX2_AVX512(residual_kernel8bit,
-                    residual_kernel8bit_c,
-                    residual_kernel8bit_avx2,
-                    residual_kernel8bit_avx512);
     SET_SSE41_AVX2(sad_loop_kernel_sparse,
                    sad_loop_kernel_sparse_c,
                    sad_loop_kernel_sparse_sse4_1_intrin,
@@ -1940,21 +1894,6 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
              ext_eight_sad_calculation_32x32_64x64_c,
              ext_eight_sad_calculation_32x32_64x64_avx2);
     SET_AVX2(eb_sad_kernel4x4, fast_loop_nxm_sad_kernel, eb_compute4x_m_sad_avx2_intrin);
-    SET_AVX2(full_distortion_kernel_cbf_zero32_bits,
-             full_distortion_kernel_cbf_zero32_bits_c,
-             full_distortion_kernel_cbf_zero32_bits_avx2);
-    SET_AVX2(full_distortion_kernel32_bits,
-             full_distortion_kernel32_bits_c,
-             full_distortion_kernel32_bits_avx2);
-    SET_AVX2(compressed_packmsb, compressed_packmsb_c, compressed_packmsb_avx2_intrin);
-    SET_AVX2(c_pack, c_pack_c, c_pack_avx2_intrin);
-    SET_SSE2_AVX2(unpack_avg, unpack_avg_c, unpack_avg_sse2_intrin, unpack_avg_avx2_intrin);
-    SET_AVX2(unpack_avg_safe_sub, unpack_avg_safe_sub_c, unpack_avg_safe_sub_avx2_intrin);
-    SET_AVX2(un_pack8_bit_data, un_pack8_bit_data_c, eb_enc_un_pack8_bit_data_avx2_intrin);
-    SET_SSE2(picture_average_kernel, picture_average_kernel_c, picture_average_kernel_sse2_intrin);
-    SET_SSE2(picture_average_kernel1_line,
-             picture_average_kernel1_line_c,
-             picture_average_kernel1_line_sse2_intrin);
     SET_SSE41_AVX2(get_eight_horizontal_search_point_results_8x8_16x16_pu,
                    get_eight_horizontal_search_point_results_8x8_16x16_pu_c,
                    get_eight_horizontal_search_point_results_8x8_16x16_pu_sse41_intrin,
@@ -1965,25 +1904,16 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
                    get_eight_horizontal_search_point_results_32x32_64x64_pu_avx2_intrin);
     SET_SSE2(
         initialize_buffer_32bits, initialize_buffer_32bits_c, initialize_buffer_32bits_sse2_intrin);
-    SET_SSE41(compute8x8_satd_u8, compute8x8_satd_u8_c, compute8x8_satd_u8_sse4);
     SET_AVX2(nxm_sad_kernel_sub_sampled,
              nxm_sad_kernel_helper_c,
              nxm_sad_kernel_sub_sampled_helper_avx2);
     SET_AVX2(nxm_sad_kernel, nxm_sad_kernel_helper_c, nxm_sad_kernel_helper_avx2);
     SET_AVX2(nxm_sad_avg_kernel, nxm_sad_avg_kernel_helper_c, nxm_sad_avg_kernel_helper_avx2);
-    SET_SSSE3(avc_style_luma_interpolation_filter,
-              avc_style_luma_interpolation_filter_helper_c,
-              avc_style_luma_interpolation_filter_helper_ssse3);
     SET_SSE2_AVX2(
         compute_mean_8x8, compute_mean_c, compute_mean8x8_sse2_intrin, compute_mean8x8_avx2_intrin);
     SET_SSE2(compute_mean_square_values_8x8,
              compute_mean_squared_values_c,
              compute_mean_of_squared_values8x8_sse2_intrin);
-    SET_SSE2_AVX2(pack2d_16_bit_src_mul4,
-                  eb_enc_msb_pack2_d,
-                  eb_enc_msb_pack2d_sse2_intrin,
-                  eb_enc_msb_pack2d_avx2_intrin_al);
-    SET_SSE2(un_pack2d_16_bit_src_mul4, eb_enc_msb_un_pack2_d, eb_enc_msb_un_pack2d_sse2_intrin);
     SET_SSE2_AVX2(compute_interm_var_four8x8,
                   compute_interm_var_four8x8_c,
                   compute_interm_var_four8x8_helper_sse2,
@@ -1994,7 +1924,6 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
     SET_AVX2(av1_compute_cross_correlation,
              av1_compute_cross_correlation_c,
              av1_compute_cross_correlation_avx2);
-    SET_SSE2(residual_kernel16bit, residual_kernel16bit_c, residual_kernel16bit_sse2_intrin);
     SET_AVX2(av1_k_means_dim1, av1_k_means_dim1_c, av1_k_means_dim1_avx2);
     SET_AVX2(av1_k_means_dim2, av1_k_means_dim2_c, av1_k_means_dim2_avx2);
     SET_AVX2(av1_calc_indices_dim1, av1_calc_indices_dim1_c, av1_calc_indices_dim1_avx2);

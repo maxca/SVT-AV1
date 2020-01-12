@@ -258,20 +258,6 @@ void intra_mode_angular_av1_z3_16bit(
     uint16_t     dy, //output parameter, pointer to the prediction
     uint16_t     bd);
 
-typedef struct CflCtx {
-    // Q3 reconstructed luma pixels (only Q2 is required, but Q3 is used to avoid
-    // shifts)
-    EB_ALIGN(64) int16_t recon_buf_q3[CFL_BUF_SQUARE];
-
-    // Height and width currently used in the CfL prediction buffer.
-    int32_t buf_height, buf_width;
-
-    int32_t are_parameters_computed;
-
-    // Chroma subsampling
-    int32_t subsampling_x, subsampling_y;
-} CflCtx;
-
 extern void cfl_luma_subsampling_420_lbd_c(const uint8_t *input, // AMIR-> Changed to 8 bit
                                            int32_t input_stride, int16_t *output_q3, int32_t width,
                                            int32_t height);
