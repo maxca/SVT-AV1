@@ -32,7 +32,8 @@
 #include "EbDecParseInterBlock.h"
 #include "EbDecProcessFrame.h"
 #include "../../Encoder/Codec/EbEntropyCoding.h"
-#include "../../Encoder/Codec/EbFullLoop.h"
+#include "EbCommonUtils.h"
+#include "EbCoefficients.h"
 
 #include "EbLog.h"
 

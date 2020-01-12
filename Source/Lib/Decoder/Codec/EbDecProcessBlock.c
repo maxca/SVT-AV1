@@ -16,7 +16,7 @@
 #include "EbDecHandle.h"
 
 #include "EbDecParseHelper.h"
-#include "EbSharedUtils.h"
+#include "EbCommonUtils.h"
 
 #include "EbDecInverseQuantize.h"
 #include "EbDecProcessFrame.h"

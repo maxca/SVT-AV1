@@ -27,29 +27,6 @@ extern "C" {
 
 #include "EbEncDecProcess.h"
 
-
-static const int8_t txsize_log2_minus4[TX_SIZES_ALL] = {
-    0, // TX_4X4
-    2, // TX_8X8
-    4, // TX_16X16
-    6, // TX_32X32
-    6, // TX_64X64
-    1, // TX_4X8
-    1, // TX_8X4
-    3, // TX_8X16
-    3, // TX_16X8
-    5, // TX_16X32
-    5, // TX_32X16
-    6, // TX_32X64
-    6, // TX_64X32
-    2, // TX_4X16
-    2, // TX_16X4
-    4, // TX_8X32
-    4, // TX_32X8
-    5, // TX_16X64
-    5, // TX_64X16
-};
-
 static const int8_t fwd_shift_4x4[3]   = {2, 0, 0};
 static const int8_t fwd_shift_8x8[3]   = {2, -1, 0};
 static const int8_t fwd_shift_16x16[3] = {2, -2, 0};
